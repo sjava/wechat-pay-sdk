@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 aes-gcm = "0.10.1"
 base64 = "0.21.0"
-http = "0.2.9"
+http = "0.2.8"
 openssl = "0.10.45"
 rand = "0.8.5"
 redis = { version = "0.22.3", features = ["tokio-comp"] }
