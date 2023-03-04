@@ -42,7 +42,7 @@
 //!   pub summary: String,
 //! }
 //! ```
-mod transaction;
+pub mod transaction;
 
 use crate::{Client, WeChatPayError};
 use base64::{engine::general_purpose, Engine};
@@ -161,7 +161,9 @@ impl WeChatWebhook {
   pub fn parse<Message: DeserializeOwned>(&self, cli: &Client) -> Result<Message, WeChatPayError> {
     let plaintext = cli.aead_aes_256_gcm_decrypt(
       self.resource.nonce.as_bytes(),
-      general_purpose::STANDARD.decode(&self.resource.ciphertext)?.as_slice(),
+      general_purpose::STANDARD
+        .decode(&self.resource.ciphertext)?
+        .as_slice(),
       match &self.resource.associated_data {
         Some(associated_data) => Some(associated_data.as_bytes()),
         None => None,

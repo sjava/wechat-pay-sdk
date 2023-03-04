@@ -9,7 +9,7 @@ pub use amount::{Amount, TransactionAmount};
 pub use discount::{Discount, GoodInfo, TransactionGoodInfo, TransactionPromotion};
 pub use order::OrderRequest;
 pub use payer::Payer;
-pub use scene::{Scene, TransactionScene, StoreInfo};
+pub use scene::{Scene, StoreInfo, TransactionScene};
 use serde::Serialize;
 pub use settle::Settle;
 
