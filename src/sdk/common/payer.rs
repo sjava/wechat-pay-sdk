@@ -1,7 +1,7 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 /// 支付者信息
-#[derive(Serialize)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct Payer {
   /// 用户标识
   ///

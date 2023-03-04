@@ -4,7 +4,7 @@ use aes_gcm::aead::{consts::U32, generic_array::GenericArray};
 use rsa::{pkcs8::DecodePrivateKey, RsaPrivateKey};
 use std::fs::read_to_string;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Client {
   pub merchant_id: String,
   pub(crate) private_key: RsaPrivateKey,

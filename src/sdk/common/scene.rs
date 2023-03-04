@@ -1,4 +1,4 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize)]
 pub struct StoreInfo {
@@ -47,4 +47,15 @@ pub struct Scene {
   /// 商户门店信息
   #[serde(skip_serializing_if = "Option::is_none")]
   pub store_info: Option<StoreInfo>,
+}
+
+/// 场景信息
+#[derive(Deserialize, Debug)]
+pub struct TransactionScene {
+  /// 商户端设备号
+  ///
+  /// 商户端设备号（门店号或收银设备ID）。
+  ///
+  /// 示例值：013467007045764
+  pub device_id: Option<String>,
 }

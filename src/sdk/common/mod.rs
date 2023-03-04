@@ -5,11 +5,11 @@ mod payer;
 mod scene;
 mod settle;
 
-pub use amount::Amount;
-pub use discount::{Discount, GoodInfo};
+pub use amount::{Amount, TransactionAmount};
+pub use discount::{Discount, GoodInfo, TransactionGoodInfo, TransactionPromotion};
 pub use order::OrderRequest;
 pub use payer::Payer;
-pub use scene::{Scene, StoreInfo};
+pub use scene::{Scene, TransactionScene, StoreInfo};
 use serde::Serialize;
 pub use settle::Settle;
 

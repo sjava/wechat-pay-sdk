@@ -16,7 +16,7 @@ use rsa::{
 use sha2::Sha256;
 
 impl Client {
-  fn sha256_with_rsa(
+  pub(crate) fn sha256_with_rsa(
     &self,
     content: &[u8],
     private_key: RsaPrivateKey,
@@ -28,7 +28,7 @@ impl Client {
     Ok(general_purpose::STANDARD.encode(signature))
   }
 
-  fn aead_aes_256_gcm_encrypt(
+  pub(crate) fn aead_aes_256_gcm_encrypt(
     &self,
     nonce: &[u8],
     plaintext: &[u8],
@@ -50,7 +50,7 @@ impl Client {
     Ok(ciphertext)
   }
 
-  fn aead_aes_256_gcm_decrypt(
+  pub(crate) fn aead_aes_256_gcm_decrypt(
     &self,
     nonce: &[u8],
     ciphertext: &[u8],
@@ -72,7 +72,7 @@ impl Client {
     Ok(plaintext)
   }
 
-  fn request_authorization(
+  pub(crate) fn request_authorization(
     &self,
     method: &Method,
     path: &str,
