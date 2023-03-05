@@ -42,6 +42,7 @@
 //!   pub summary: String,
 //! }
 //! ```
+pub mod refund;
 pub mod transaction;
 
 use crate::{Client, WeChatPayError};
@@ -85,6 +86,10 @@ pub struct Resource {
 /// - [JSApi 支付 > 退款结果通知](https://pay.weixin.qq.com/wiki/doc/apiv3/apis/chapter3_1_11.shtml)
 ///
 /// 尽管格式基本相同，但对字段的描述有所区别，这里使用第一个文档中的具体描述。
+/// ## 通知报文
+/// 支付结果通知是以 POST 方法访问商户设置的通知 url，通知的数据以 JSON 格式通过请求主体（BODY）传输。通知的数据包括了加密的支付结果详情。
+///
+/// （注：由于涉及到回调加密和解密，商户必须先设置好 apiv3 秘钥后才能解密回调通知，apiv3 秘钥设置文档指引详见
 /// ## 参数解密
 /// 下面详细描述对通知数据进行解密的流程：
 ///
@@ -116,6 +121,27 @@ pub struct Resource {
 ///     }
 /// }
 /// ```
+/// ## 通知应答
+/// - 接收成功：HTTP 应答状态码需返回 200 或 204，无需返回应答报文。
+/// - 接收失败：HTTP 应答状态码需返回 5XX 或 4XX，同时需返回应答报文，格式如下：
+/// ```no_run
+/// pub struct WebHookErrorResponse {
+///   /// 返回状态码
+///   ///
+///   /// 错误码，SUCCESS为接收成功，其他错误码为失败
+///   ///
+///   /// 示例值：SUCCESS
+///   pub code: String,
+///   /// 返回信息
+///   ///
+///   /// 返回信息，如非空，为错误原因
+///   ///
+///   /// 示例值：系统错误
+///   pub message: Option<String>,
+/// }
+/// ```
+///
+/// 注意：重试过多会导致微信支付端积压过多通知而堵塞，影响其他正常通知。
 #[derive(Deserialize, Debug)]
 pub struct WeChatWebhook {
   /// 通知 ID
@@ -135,7 +161,11 @@ pub struct WeChatWebhook {
   pub create_time: String,
   /// 通知类型
   ///
-  /// 通知的类型，支付成功通知的类型为 TRANSACTION.SUCCESS
+  /// 通知的类型：
+  /// - TRANSACTION.SUCCESS：支付成功通知
+  /// - REFUND.SUCCESS：退款成功通知
+  /// - REFUND.ABNORMAL：退款异常通知
+  /// - REFUND.CLOSED：退款关闭通知
   ///
   /// 示例值：TRANSACTION.SUCCESS
   pub event_type: String,

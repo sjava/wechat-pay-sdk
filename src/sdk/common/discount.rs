@@ -1,40 +1,5 @@
+use super::{GoodInfo, RefundGoodsDetail, TransactionGoodInfo};
 use serde::{Deserialize, Serialize};
-
-/// 商品信息
-#[derive(Serialize)]
-pub struct GoodInfo {
-  /// 商户侧商品编码
-  ///
-  /// 由半角的大小写字母、数字、中划线、下划线中的一种或几种组成。
-  ///
-  /// 示例值：1246464644
-  pub merchant_goods_id: String,
-  /// 微信支付商品编码
-  ///
-  /// 微信支付定义的统一商品编号（没有可不传）
-  ///
-  /// 示例值：1001
-  pub wechatpay_goods_id: Option<String>,
-  /// 商品名称
-  ///
-  /// 商品的实际名称
-  ///
-  /// 示例值：iPhoneX 256G
-  pub goods_name: Option<String>,
-  /// 商品数量
-  ///
-  /// 用户购买的数量
-  ///
-  /// 示例值：1
-  pub quantity: i64,
-  /// 商品单价
-  ///
-  /// 单位为：分。如果商户有优惠，需传输商户优惠后的单价（例如：用户对一笔 100 元的订单使用了商场发的纸质优惠券 100-50，
-  /// 则活动商品的单价应为原单价-50）
-  ///
-  /// 示例值：528800
-  pub unit_price: i64,
-}
 
 /// 优惠信息
 #[derive(Serialize)]
@@ -62,39 +27,6 @@ pub struct Discount {
   /// 条目个数限制：【1，6000】
   #[serde(skip_serializing_if = "Option::is_none")]
   pub goods_detail: Option<Vec<GoodInfo>>,
-}
-
-/// 商品信息
-#[derive(Deserialize, Debug)]
-pub struct TransactionGoodInfo {
-  /// 商品编码
-  ///
-  /// 示例值：M1006
-  pub goods_id: String,
-  /// 商品数量
-  ///
-  /// 用户购买的数量
-  ///
-  /// 示例值：1
-  pub quantity: i32,
-  /// 商品单价
-  ///
-  /// 商品单价，单位为分
-  ///
-  /// 示例值：100
-  pub unit_price: i32,
-  /// 商品优惠金额
-  ///
-  /// 商品优惠金额
-  ///
-  /// 示例值：0
-  pub discount_amount: i32,
-  /// 商品备注
-  ///
-  /// 商品备注信息
-  ///
-  /// 示例值：商品备注信息
-  pub goods_remark: Option<String>,
 }
 
 /// 优惠功能
@@ -161,4 +93,46 @@ pub struct TransactionPromotion {
   ///
   /// 单品列表信息
   pub goods_detail: Option<Vec<TransactionGoodInfo>>,
+}
+
+/// 优惠功能
+#[derive(Deserialize, Debug)]
+pub struct RefundPromotion {
+  /// 券 ID
+  ///
+  /// 示例值：109519
+  pub coupon_id: String,
+  /// 优惠范围
+  ///
+  /// GLOBAL：全场代金券
+  ///
+  /// SINGLE：单品优惠
+  ///
+  /// 示例值：SINGLE
+  pub scope: Option<String>,
+  /// 优惠类型
+  ///
+  /// COUPON：代金券，需要走结算资金的充值型代金券
+  ///
+  /// DISCOUNT：优惠券，不走结算资金的免充值型优惠券
+  ///
+  /// 示例值：DISCOUNT
+  #[serde(rename = "type")]
+  pub type_: String,
+  /// 优惠券面额
+  ///
+  /// 用户享受优惠的金额（优惠券面额=微信出资金额+商家出资金额+其他出资方金额），单位为分
+  ///
+  /// 示例值：5
+  pub amount: i32,
+  /// 优惠退款金额
+  ///
+  /// 优惠退款金额<=退款金额，退款金额-代金券或立减优惠退款金额为用户支付的现金，说明详见代金券或立减优惠，单位为分
+  ///
+  /// 示例值：100
+  pub refund_amount: i32,
+  /// 单品列表
+  ///
+  /// 单品列表信息
+  pub goods_detail: Option<Vec<RefundGoodsDetail>>,
 }

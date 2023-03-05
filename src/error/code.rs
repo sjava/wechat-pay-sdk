@@ -6,6 +6,7 @@ use serde::Deserialize;
 pub enum WeChatPayApiErrorCode {
   Common(Common),
   Order(Order),
+  Refund(Refund),
 }
 
 /// [公共错误码](https://pay.weixin.qq.com/wiki/doc/apiv3/Share/error_code.shtml)
@@ -208,4 +209,15 @@ pub enum Order {
   ///
   /// 请检查微信支付订单号是否正确
   InvalidTransactionid,
+}
+
+/// 退款错误
+/// - [申请退款](https://pay.weixin.qq.com/wiki/doc/apiv3/apis/chapter3_1_9.shtml)
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum Refund {
+  /// 余额不足
+  ///
+  /// 此状态代表退款申请失败，商户可根据具体的错误提示做相应的处理。
+  NotEnough,
 }

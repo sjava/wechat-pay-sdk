@@ -3,7 +3,7 @@ mod code;
 mod external;
 
 use crate::Client;
-pub use code::{Common, Order, WeChatPayApiErrorCode};
+pub use code::WeChatPayApiErrorCode;
 use http::StatusCode;
 use serde::{de::DeserializeOwned, Deserialize};
 
