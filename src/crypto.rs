@@ -19,8 +19,9 @@ impl Client {
   pub fn sha256_with_rsa(
     &self,
     content: &[u8],
-    private_key: RsaPrivateKey,
+    private_key: Option<RsaPrivateKey>,
   ) -> Result<String, WeChatPayError> {
+    let private_key = private_key.unwrap_or(self.private_key.clone());
     let mut hasher = Sha256::new();
     hasher.update(content);
     let hex = hasher.finalize();
@@ -93,7 +94,7 @@ impl Client {
       nonce,
       content
     );
-    let signature = self.sha256_with_rsa(content.as_bytes(), self.private_key.clone())?;
+    let signature = self.sha256_with_rsa(content.as_bytes(), None)?;
     Ok(format!(
       "WECHATPAY2-SHA256-RSA2048 mchid=\"{}\",nonce_str=\"{}\",signature=\"{}\",timestamp=\"{}\",serial_no=\"{}\"",
       self.merchant_id,
