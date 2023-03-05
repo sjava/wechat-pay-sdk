@@ -16,7 +16,7 @@ use rsa::{
 use sha2::Sha256;
 
 impl Client {
-  pub(crate) fn sha256_with_rsa(
+  pub fn sha256_with_rsa(
     &self,
     content: &[u8],
     private_key: RsaPrivateKey,
@@ -28,7 +28,7 @@ impl Client {
     Ok(general_purpose::STANDARD.encode(signature))
   }
 
-  pub(crate) fn aead_aes_256_gcm_encrypt(
+  pub fn aead_aes_256_gcm_encrypt(
     &self,
     nonce: &[u8],
     plaintext: &[u8],
@@ -50,7 +50,7 @@ impl Client {
     Ok(ciphertext)
   }
 
-  pub(crate) fn aead_aes_256_gcm_decrypt(
+  pub fn aead_aes_256_gcm_decrypt(
     &self,
     nonce: &[u8],
     ciphertext: &[u8],
@@ -72,7 +72,7 @@ impl Client {
     Ok(plaintext)
   }
 
-  pub(crate) fn request_authorization(
+  pub fn request_authorization(
     &self,
     method: &Method,
     path: &str,
@@ -110,7 +110,7 @@ impl Client {
   /// [签名验证](https://pay.weixin.qq.com/wiki/doc/apiv3/wechatpay/wechatpay4_1.shtml)
   /// 逻辑，返回结果参考
   /// [parse_response](Self::parse_response)
-  pub(crate) async fn send_request<Request, Response>(
+  pub async fn send_request<Request, Response>(
     &self,
     method: Method,
     url: &str,
