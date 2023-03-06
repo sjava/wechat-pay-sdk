@@ -80,9 +80,8 @@ pub struct RefundAmount {
   /// 2. 账户类型不能重复。
   ///
   /// 上述任一条件不满足将返回错误
-  ///
-  /// 注：此参数不可为空，否则将返回错误
-  pub from: Vec<RefundFrom>,
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub from: Option<Vec<RefundFrom>>,
   /// 原订单金额
   ///
   /// 原支付交易的订单总金额，单位为分，只能为整数。
