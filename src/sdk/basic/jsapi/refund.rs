@@ -71,11 +71,13 @@ pub struct RefundRequest {
   /// 金额信息
   ///
   /// 订单金额信息
-  pub amount: Option<RefundAmount>,
+  pub amount: RefundAmount,
   /// 退款商品
   ///
   /// 指定商品退款需要传此参数，其他场景无需传递
-  pub goods_detail: Option<Vec<RefundGoodsDetail>>,
+  ///
+  /// 注：实际操作中如果无需此参数，则需要传空数组，否则会返回错误
+  pub goods_detail: Vec<RefundGoodsDetail>,
 }
 
 #[derive(Deserialize, Debug)]
