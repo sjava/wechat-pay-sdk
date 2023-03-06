@@ -34,12 +34,14 @@ pub struct RefundRequest {
   /// 原支付交易对应的微信订单号，与商户订单号必填一个
   ///
   /// 示例值：1217752501201407033233368018
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub transaction_id: Option<String>,
   /// 商户订单号
   ///
   /// 原支付交易对应的商户订单号，与微信支付订单号必填一个
   ///
   /// 示例值：1217752501201407033233368018
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub out_trade_no: Option<String>,
   /// 商户退款单号
   ///
@@ -52,12 +54,14 @@ pub struct RefundRequest {
   /// 若商户传入，会在下发给用户的退款消息中体现退款原因
   ///
   /// 示例值：商品已售完
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub reason: Option<String>,
   /// 退款结果回调 url
   ///
   /// 异步接收微信支付退款结果通知的回调地址，通知 url 必须为外网可访问的 url，不能携带参数。如果参数中传了 notify_url，则商户平台上配置的回调地址将不会生效，优先回调当前传的这个地址。
   ///
   /// 示例值：https://weixin.qq.com
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub notify_url: Option<String>,
   /// 退款资金来源
   ///
@@ -67,6 +71,7 @@ pub struct RefundRequest {
   /// - AVAILABLE：可用余额账户
   ///
   /// 示例值：AVAILABLE
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub funds_account: Option<String>,
   /// 金额信息
   ///

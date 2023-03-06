@@ -13,18 +13,21 @@ pub struct StoreInfo {
   /// 商户侧门店名称
   ///
   /// 示例值：腾讯大厦分店
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub name: Option<String>,
   /// 地区编码
   ///
   /// 地区编码，详细请见省市区编号对照表。
   ///
   /// 示例值：440305
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub area_code: Option<String>,
   /// 详细地址
   ///
   /// 详细的商户门店地址
   ///
   /// 示例值：广东省深圳市南山区科技中一道 10000 号
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub address: Option<String>,
 }
 

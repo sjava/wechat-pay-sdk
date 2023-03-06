@@ -14,12 +14,14 @@ pub struct GoodInfo {
   /// 微信支付定义的统一商品编号（没有可不传）
   ///
   /// 示例值：1001
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub wechatpay_goods_id: Option<String>,
   /// 商品名称
   ///
   /// 商品的实际名称
   ///
   /// 示例值：iPhoneX 256G
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub goods_name: Option<String>,
   /// 商品数量
   ///
@@ -83,12 +85,14 @@ pub struct RefundGoodsDetail {
   /// 微信支付定义的统一商品编号（没有可不传）
   ///
   /// 示例值：1001
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub wechatpay_goods_id: Option<String>,
   /// 商品名称
   ///
   /// 商品的实际名称
   ///
   /// 示例值：iPhone6s 16G
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub goods_name: Option<String>,
   /// 商品单价
   ///
