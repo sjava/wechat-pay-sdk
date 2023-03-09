@@ -80,9 +80,8 @@ pub struct RefundRequest {
   /// 退款商品
   ///
   /// 指定商品退款需要传此参数，其他场景无需传递
-  ///
-  /// 注：实际操作中如果无需此参数，则需要传空数组，否则会返回错误
-  pub goods_detail: Vec<RefundGoodsDetail>,
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub goods_detail: Option<Vec<RefundGoodsDetail>>,
 }
 
 #[derive(Deserialize, Debug)]

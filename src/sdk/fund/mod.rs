@@ -1,0 +1,17 @@
+//! # 资金应用
+//! ## 商家转账到零钱
+//! - [发起批量转账](transfer)
+//! - 查询转账批次单
+//!   - [通过微信批次单号查询批次单](https://pay.weixin.qq.com/docs/merchant/apis/batch-transfer-to-balance/transfer-batch/get-transfer-batch-by-no.html)
+//!   - [通过商家批次单号查询批次单](https://pay.weixin.qq.com/docs/merchant/apis/batch-transfer-to-balance/transfer-batch/get-transfer-batch-by-out-no.html)
+//! - 查询转账明细单
+//!   - [通过微信明细单号查询明细单](https://pay.weixin.qq.com/docs/merchant/apis/batch-transfer-to-balance/transfer-detail/get-transfer-detail-by-no.html)
+//!   - [通过商家明细单号查询明细单](https://pay.weixin.qq.com/docs/merchant/apis/batch-transfer-to-balance/transfer-detail/get-transfer-detail-by-out-no.html)
+//! - 申请转账电子回单
+//!   - [申请转账批次电子回单](https://pay.weixin.qq.com/docs/merchant/apis/batch-transfer-to-balance/electronic-signature/create-electronic-signature.html)
+//!   - [查询转账批次电子回单](https://pay.weixin.qq.com/docs/merchant/apis/batch-transfer-to-balance/electronic-signature/get-electronic-signature-by-out-no.html)
+//! - 申请转账明细电子回单
+//!   - [申请转账明细电子回单](https://pay.weixin.qq.com/docs/merchant/apis/batch-transfer-to-balance/electronic-receipt-api/create-electronic-receipt.html)
+//!   - [查询转账明细电子回单](https://pay.weixin.qq.com/docs/merchant/apis/batch-transfer-to-balance/electronic-receipt-api/query-electronic-receipt.html)
+//! - 下载电子回单
+pub mod transfer;

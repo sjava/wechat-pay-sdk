@@ -4,9 +4,10 @@
 //! - 经营能力
 //! - 行业方案
 //! - 营销工具
-//! - 资金应用
+//! - [资金应用](fund)
 //! - 风险合规
 //! - 其他能力
 pub mod basic;
 pub(crate) mod cert;
 pub mod common;
+pub mod fund;
