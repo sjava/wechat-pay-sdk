@@ -155,6 +155,10 @@ impl Client {
       header::AUTHORIZATION,
       header::HeaderValue::from_str(&signature)?,
     );
+    req.headers_mut().insert(
+      "Wechatpay-Serial",
+      header::HeaderValue::from_str(&self.merchant_serial_number)?,
+    );
 
     let res = self.client.execute(req).await?;
     let status = res.status();

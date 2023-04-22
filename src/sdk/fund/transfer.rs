@@ -1,5 +1,5 @@
 //! # [发起商家转账](https://pay.weixin.qq.com/docs/merchant/apis/batch-transfer-to-balance/transfer-batch/initiate-batch-transfer.html)
-//! 更新时间：2023.02.16
+//! 更新时间：2023.03.21
 //!
 //! 发起商家转账接口。商户可以通过该接口同时向多个用户微信零钱进行转账操作。请求消息中应包含商家批次单号、转账名称、appid、转账总金额、转账总笔数、转账
 //! openid、收款用户姓名等信息。
@@ -23,7 +23,7 @@ pub struct TransferDetailInput {
   pub transfer_amount: i32,
   /// 单条转账备注（微信用户会收到该备注），UTF8 编码，最多允许 32 个字符
   pub transfer_remark: String,
-  /// 商户appid下，某用户的openid
+  /// 商户 appid 下，某用户的 openid
   pub openid: String,
   /// 收款方真实姓名。支持标准 RSA 算法和国密算法，公钥由微信侧提供
   ///
@@ -34,6 +34,7 @@ pub struct TransferDetailInput {
   /// 同一批次转账明细中的姓名字段传入规则需保持一致，也即全部填写、或全部不填写
   ///
   /// 若商户传入收款用户姓名，微信支付会校验用户 openID 与姓名是否一致，并提供电子回单
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub user_name: Option<String>,
 }
 
@@ -54,10 +55,11 @@ pub struct BatchTransferRequest {
   /// 发起批量转账的明细列表，最多一千笔
   pub transfer_detail_list: Vec<TransferDetailInput>,
   /// 必填，指定该笔转账使用的转账场景 ID
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub transfer_scene_id: Option<String>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct BatchTransferResponse {
   /// 商户系统内部的商家批次单号，在商户系统内部唯一
   pub out_batch_no: String,
