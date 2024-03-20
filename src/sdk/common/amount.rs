@@ -39,7 +39,7 @@ pub struct TransactionAmount {
   pub payer_currency: String,
 }
 
-/// 退款出资账户及金额	from	array	否	退款需要从指定账户出资时，传递此参数指定出资金额（币种的最小单位，只能为整数）。
+/// 退款出资账户及金额 from array 否退款需要从指定账户出资时，传递此参数指定出资金额（币种的最小单位，只能为整数）。
 #[derive(Deserialize, Serialize, Debug)]
 pub struct RefundFrom {
   /// 出资账户类型

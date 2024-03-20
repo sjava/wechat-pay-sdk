@@ -55,7 +55,7 @@ pub enum WeChatPayError {
   RedisError(redis::RedisError),
   /// 加密错误，通常是由于配置错误
   CryptoError(String),
-  WeChatApiError(WeChatPayApiError),
+  WeChatApiError(Box<WeChatPayApiError>),
   /// 服务器已接受请求，但尚未处理，一般的解决方案是使用原参数重复请求一遍
   Accepted,
   /// 通常应该是 sdk 实现有不当之处
@@ -72,7 +72,7 @@ impl Client {
   {
     serde_json::from_str::<Response>(text).map_err(|_| {
       serde_json::from_str::<WeChatPayApiError>(text)
-        .map(WeChatPayError::WeChatApiError)
+        .map(|err| WeChatPayError::WeChatApiError(Box::new(err)))
         .unwrap_or_else(|_| WeChatPayError::Unknown(format!("Failed to parse response: {}", text)))
     })
   }
@@ -94,9 +94,9 @@ impl Client {
       200 => Ok(Some(Self::parse_json::<Response>(&text)?)),
       204 => Ok(None),
       202 => Err(WeChatPayError::Accepted),
-      400..=501 | 503 => Err(WeChatPayError::WeChatApiError(Self::parse_json::<
-        WeChatPayApiError,
-      >(&text)?)),
+      400..=501 | 503 => Err(WeChatPayError::WeChatApiError(Box::new(
+        Self::parse_json::<WeChatPayApiError>(&text)?,
+      ))),
       _ => Err(WeChatPayError::Unknown(
         "Unknown response status code".to_string(),
       )),
