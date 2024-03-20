@@ -1,7 +1,8 @@
 use super::WeChatPayError;
 use aes_gcm::Error as AesGcmError;
 use base64::DecodeError;
-use http::header::{InvalidHeaderValue, ToStrError as HttpHeaderToStrError};
+use http::header::ToStrError as HttpHeaderToStrError;
+use reqwest::header::InvalidHeaderValue;
 use reqwest::Error as ReqwestError;
 use rsa::{errors::Error as RsaError, pkcs8::Error as Pkcs8DecodeError};
 use serde_json::Error as SerdeError;

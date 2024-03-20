@@ -24,7 +24,7 @@ use crate::{
   sdk::common::{RefundAmount, RefundAmountResponse, RefundGoodsDetail, RefundPromotion},
   Client, WeChatPayError,
 };
-use http::Method;
+use reqwest::Method;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Debug)]

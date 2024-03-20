@@ -4,7 +4,7 @@ mod external;
 
 use crate::Client;
 pub use code::WeChatPayApiErrorCode;
-use http::StatusCode;
+use reqwest::StatusCode;
 use serde::{de::DeserializeOwned, Deserialize};
 
 #[derive(Debug, Deserialize)]
@@ -71,10 +71,9 @@ impl Client {
     Response: DeserializeOwned + Send + 'static,
   {
     serde_json::from_str::<Response>(text).map_err(|_| {
-      match serde_json::from_str::<WeChatPayApiError>(text) {
-        Ok(err) => WeChatPayError::WeChatApiError(err),
-        Err(_) => WeChatPayError::Unknown(format!("Failed to parse response: {}", text)),
-      }
+      serde_json::from_str::<WeChatPayApiError>(text)
+        .map(WeChatPayError::WeChatApiError)
+        .unwrap_or_else(|_| WeChatPayError::Unknown(format!("Failed to parse response: {}", text)))
     })
   }
 
