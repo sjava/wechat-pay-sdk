@@ -64,6 +64,21 @@ pub enum WeChatPayError {
   InternalServerError(String),
 }
 
+// implement display trait for WeChatPayError
+impl std::fmt::Display for WeChatPayError {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    match self {
+      WeChatPayError::NetworkError(err) => write!(f, "NetworkError: {}", err),
+      WeChatPayError::RedisError(err) => write!(f, "RedisError: {}", err),
+      WeChatPayError::CryptoError(err) => write!(f, "CryptoError: {}", err),
+      WeChatPayError::WeChatApiError(err) => write!(f, "WeChatApiError: {:?}", err),
+      WeChatPayError::Accepted => write!(f, "Accepted"),
+      WeChatPayError::Unknown(err) => write!(f, "Unknown: {}", err),
+      WeChatPayError::InternalServerError(err) => write!(f, "InternalServerError: {}", err),
+    }
+  }
+}
+
 impl Client {
   #[inline]
   fn parse_json<Response>(text: &str) -> Result<Response, WeChatPayError>
