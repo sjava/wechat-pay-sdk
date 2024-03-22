@@ -9,7 +9,7 @@ pub struct PlatformPubKey {
   pub serial_no: String,
   pub expire_time: String,
   pub effective_time: String,
-  pub pub_key: String,
+  pub key: String,
 }
 #[derive(Debug)]
 pub struct Client {
@@ -17,8 +17,6 @@ pub struct Client {
   pub(crate) private_key: RsaPrivateKey,
   pub(crate) merchant_serial_number: String,
   pub(crate) api_key: GenericArray<u8, U32>,
-  // pub(crate) redis: MultiplexedConnection,
-  pub(crate) client: reqwest::Client,
   pub(crate) platform_pub_keys: Option<Vec<PlatformPubKey>>,
 }
 
@@ -45,7 +43,7 @@ impl Client {
       merchant_serial_number: merchant_serial_number.to_string(),
       api_key: GenericArray::from_slice(api_key.as_bytes()).to_owned(),
       // redis,
-      client: reqwest::Client::new(),
+      // client: reqwest::Client::new(),
       platform_pub_keys,
     })
   }

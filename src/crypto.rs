@@ -160,29 +160,26 @@ impl Client {
       header::HeaderValue::from_str(&self.merchant_serial_number)?,
     );
 
-    let res = self.client.execute(req).await?;
-    let status = res.status();
-    // let signature = res.headers().get("wechatpay-signature").unwrap().to_str()?.to_string();
-    // let nonce = res.headers().get("wechatpay-nonce").unwrap().to_str()?.to_string();
-    // let timestamp = res.headers().get("wechatpay-timestamp").unwrap().to_str()?.to_string();
-    // let cert_serial = res.headers().get("wechatpay-serial").unwrap().to_str()?.to_string();
-    let text = res
-      .text()
-      .await
-      .map_err(|_| WeChatPayError::Unknown("Failed to decode response".to_string()))?;
-
-    // TODO: check response signature
+    let client = reqwest::Client::new();
+    let res = client.execute(req).await?;
+    let (status, text)= if verify {
+      self.verify_signatrue(res).await?
+    } else {
+      (res.status(), res.text().await?)
+    };
     Self::parse_response(status, text).await
   }
 
   pub async fn verify_signatrue(
     &self,
-    response:Response,
+    response: Response,
   ) -> Result<(StatusCode, String), WeChatPayError> {
+    let timestamp = Self::get_header(&response, "Wechatpay-Timestamp")?;
+    Self::verify_timestamp(timestamp.as_str())?;
+
+    let serial_no = Self::get_header(&response, "Wechatpay-Serial")?;
     let signature = Self::get_header(&response, "Wechatpay-Signature")?;
     let nonce = Self::get_header(&response, "Wechatpay-Nonce")?;
-    let timestamp = Self::get_header(&response, "Wechatpay-Timestamp")?;
-    let serial_no = Self::get_header(&response, "Wechatpay-Serial")?;
 
     let status = response.status();
     let body = response.text().await?;
@@ -200,7 +197,7 @@ impl Client {
           "No public key found".to_string(),
         ))?;
 
-    let pub_key = RsaPublicKey::from_public_key_pem(&pub_key.pub_key).map_err(|e| {
+    let pub_key = RsaPublicKey::from_public_key_pem(&pub_key.key).map_err(|e| {
       WeChatPayError::VerifySignatureFail(format!("public key parser error: {}", e))
     })?;
     let hashed = Sha256::new().chain_update(message).finalize();
@@ -210,8 +207,8 @@ impl Client {
     let scheme = Pkcs1v15Sign::new::<Sha256>();
     pub_key
       .verify(scheme, &hashed, signatrue.as_slice())
-      .map_err(|e| WeChatPayError::VerifySignatureFail(e.to_string()))
       .map(|_| (status, body))
+      .map_err(|e| WeChatPayError::VerifySignatureFail(e.to_string()))
   }
 
   fn get_header(response: &Response, key: &str) -> Result<String, WeChatPayError> {
@@ -223,5 +220,17 @@ impl Client {
         .to_str()?
         .to_string(),
     )
+  }
+  fn verify_timestamp(timestamp: &str) -> Result<(), WeChatPayError> {
+    let timestamp = timestamp
+      .parse::<u64>()
+      .map_err(|_| WeChatPayError::VerifySignatureFail("Failed to parse timestamp".to_string()))?;
+    let now = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
+    if now.abs_diff(timestamp) > 300 {
+      return Err(WeChatPayError::VerifySignatureFail(
+        "Timestamp expired".to_string(),
+      ));
+    }
+    Ok(())
   }
 }

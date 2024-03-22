@@ -39,42 +39,14 @@ impl Client {
     let headers = self.build_header(signature)?;
     let form = build_form(&meta, image, filename)?;
     let url = format!("https://api.mch.weixin.qq.com{}", api);
-    let response = self
-      .client
+    let client = reqwest::Client::new();
+    let response = client
       .post(&url)
       .headers(headers)
       .multipart(form)
       .send()
       .await?;
-    let status = response.status();
-    let headers = response.headers().clone();
-    let timestamp = headers
-      .get("Wechatpay-Timestamp")
-      .ok_or_else(|| {
-        WeChatPayError::VerifySignatureFail("Missing Wechatpay-Timestamp".to_string())
-      })?
-      .to_str()?;
-    let nonce = headers
-      .get("Wechatpay-Nonce")
-      .ok_or_else(|| WeChatPayError::VerifySignatureFail("Missing Wechatpay-Nonce".to_string()))?
-      .to_str()?;
-    let serial = headers
-      .get("Wechatpay-Serial")
-      .ok_or_else(|| WeChatPayError::VerifySignatureFail("Missing Wechatpay-Serial".to_string()))?
-      .to_str()?;
-    let signature = headers
-      .get("Wechatpay-Signature")
-      .ok_or_else(|| {
-        WeChatPayError::VerifySignatureFail("Missing Wechatpay-Signature".to_string())
-      })?
-      .to_str()?;
-    let text = response
-      .text()
-      .await
-      .map_err(|_| WeChatPayError::Unknown("Failed to decode response".to_string()))?;
-
-    let verify = self.verify_signatrue(timestamp, nonce, signature, serial, &text);
-    println!("verify: {:#?}", verify);
+    let (status, text) = self.verify_signatrue(response).await?;
 
     let response = Self::parse_response::<UploadImageResponse>(status, text)
       .await?
