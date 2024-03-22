@@ -10,7 +10,7 @@ use reqwest::multipart::{Form, Part};
 use reqwest::{header, Method};
 use serde::Deserialize;
 use serde_json::json;
-use sha2::{Digest, Sha256};
+use rsa::sha2::{Digest, Sha256};
 
 /// # [上传图片响应](self) 响应
 #[derive(Debug, Deserialize)]
@@ -24,7 +24,6 @@ impl Client {
     image: Vec<u8>,
     filename: &str,
   ) -> Result<UploadImageResponse, WeChatPayError> {
-    const URL: &str = "/v3/merchant/media/upload";
 
     // calculate sha256
     let mut hasher = Sha256::new();
@@ -32,19 +31,18 @@ impl Client {
     let hash = hasher.finalize();
     let hash = hex::encode(hash.as_slice());
 
-    let path = format!("https://api.mch.weixin.qq.com{}", URL);
+    let api = "/v3/merchant/media/upload";
     let meta = json!( {
         "filename": filename,
         "sha256": hash
     });
-    let signature = self.request_authorization(&Method::POST, &path, &meta.to_string())?;
+    let signature = self.request_authorization(&Method::POST, api, &meta.to_string())?;
     let headers = self.build_header(signature)?;
-
     let form = build_form(&meta, image, filename)?;
-
+    let url = format!("https://api.mch.weixin.qq.com{}", api);
     let response = self
       .client
-      .post(&path)
+      .post(&url)
       .headers(headers)
       .multipart(form)
       .send()

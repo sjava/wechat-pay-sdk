@@ -10,10 +10,9 @@ use reqwest::{header, Method, Url};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use rsa::{
-  sha2::{Digest, Sha256 as Sha256Hasher},
+  sha2::{Digest, Sha256},
   Pkcs1v15Sign, RsaPrivateKey,
 };
-use sha2::Sha256;
 
 impl Client {
   pub fn sha256_with_rsa(
@@ -25,7 +24,7 @@ impl Client {
     let mut hasher = Sha256::new();
     hasher.update(content);
     let hex = hasher.finalize();
-    let signature = private_key.sign(Pkcs1v15Sign::new::<Sha256Hasher>(), &hex)?;
+    let signature = private_key.sign(Pkcs1v15Sign::new::<Sha256>(), &hex)?;
     Ok(general_purpose::STANDARD.encode(signature))
   }
 
