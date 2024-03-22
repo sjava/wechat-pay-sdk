@@ -49,4 +49,11 @@ impl Client {
       platform_pub_keys,
     })
   }
+  pub fn get_pub_key(&self, serial_no: &str) -> Option<&PlatformPubKey> {
+    self
+      .platform_pub_keys
+      .as_ref()?
+      .iter()
+      .find(|x| x.serial_no == serial_no)
+  }
 }

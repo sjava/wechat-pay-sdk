@@ -6,12 +6,13 @@ use aes_gcm::{
 };
 use base64::{engine::general_purpose, Engine};
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
-use reqwest::{header, Method, Url};
+use reqwest::{header, Method, Response, StatusCode, Url};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use rsa::{
+  pkcs8::DecodePublicKey,
   sha2::{Digest, Sha256},
-  Pkcs1v15Sign, RsaPrivateKey,
+  Pkcs1v15Sign, RsaPrivateKey, RsaPublicKey,
 };
 
 impl Client {
@@ -172,5 +173,55 @@ impl Client {
 
     // TODO: check response signature
     Self::parse_response(status, text).await
+  }
+
+  pub async fn verify_signatrue(
+    &self,
+    response:Response,
+  ) -> Result<(StatusCode, String), WeChatPayError> {
+    let signature = Self::get_header(&response, "Wechatpay-Signature")?;
+    let nonce = Self::get_header(&response, "Wechatpay-Nonce")?;
+    let timestamp = Self::get_header(&response, "Wechatpay-Timestamp")?;
+    let serial_no = Self::get_header(&response, "Wechatpay-Serial")?;
+
+    let status = response.status();
+    let body = response.text().await?;
+
+    let message = format!(
+      "{}\n{}\n{}\n",
+      timestamp.as_str(),
+      nonce.as_str(),
+      body.as_str()
+    );
+    let pub_key =
+      self
+        .get_pub_key(serial_no.as_ref())
+        .ok_or(WeChatPayError::VerifySignatureFail(
+          "No public key found".to_string(),
+        ))?;
+
+    let pub_key = RsaPublicKey::from_public_key_pem(&pub_key.pub_key).map_err(|e| {
+      WeChatPayError::VerifySignatureFail(format!("public key parser error: {}", e))
+    })?;
+    let hashed = Sha256::new().chain_update(message).finalize();
+    let signatrue = general_purpose::STANDARD
+      .decode(signature.as_str())
+      .map_err(|e| WeChatPayError::VerifySignatureFail(format!("signature decode error: {}", e)))?;
+    let scheme = Pkcs1v15Sign::new::<Sha256>();
+    pub_key
+      .verify(scheme, &hashed, signatrue.as_slice())
+      .map_err(|e| WeChatPayError::VerifySignatureFail(e.to_string()))
+      .map(|_| (status, body))
+  }
+
+  fn get_header(response: &Response, key: &str) -> Result<String, WeChatPayError> {
+    Ok(
+      response
+        .headers()
+        .get(key)
+        .ok_or_else(|| WeChatPayError::VerifySignatureFail(format!("Missing {}", key)))?
+        .to_str()?
+        .to_string(),
+    )
   }
 }

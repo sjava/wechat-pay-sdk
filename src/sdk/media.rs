@@ -8,9 +8,9 @@
 use crate::{Client, WeChatPayError};
 use reqwest::multipart::{Form, Part};
 use reqwest::{header, Method};
+use rsa::sha2::{Digest, Sha256};
 use serde::Deserialize;
 use serde_json::json;
-use rsa::sha2::{Digest, Sha256};
 
 /// # [上传图片响应](self) 响应
 #[derive(Debug, Deserialize)]
@@ -24,7 +24,6 @@ impl Client {
     image: Vec<u8>,
     filename: &str,
   ) -> Result<UploadImageResponse, WeChatPayError> {
-
     // calculate sha256
     let mut hasher = Sha256::new();
     hasher.update(&image);
@@ -48,10 +47,34 @@ impl Client {
       .send()
       .await?;
     let status = response.status();
+    let headers = response.headers().clone();
+    let timestamp = headers
+      .get("Wechatpay-Timestamp")
+      .ok_or_else(|| {
+        WeChatPayError::VerifySignatureFail("Missing Wechatpay-Timestamp".to_string())
+      })?
+      .to_str()?;
+    let nonce = headers
+      .get("Wechatpay-Nonce")
+      .ok_or_else(|| WeChatPayError::VerifySignatureFail("Missing Wechatpay-Nonce".to_string()))?
+      .to_str()?;
+    let serial = headers
+      .get("Wechatpay-Serial")
+      .ok_or_else(|| WeChatPayError::VerifySignatureFail("Missing Wechatpay-Serial".to_string()))?
+      .to_str()?;
+    let signature = headers
+      .get("Wechatpay-Signature")
+      .ok_or_else(|| {
+        WeChatPayError::VerifySignatureFail("Missing Wechatpay-Signature".to_string())
+      })?
+      .to_str()?;
     let text = response
       .text()
       .await
       .map_err(|_| WeChatPayError::Unknown("Failed to decode response".to_string()))?;
+
+    let verify = self.verify_signatrue(timestamp, nonce, signature, serial, &text);
+    println!("verify: {:#?}", verify);
 
     let response = Self::parse_response::<UploadImageResponse>(status, text)
       .await?

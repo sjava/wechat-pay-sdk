@@ -62,6 +62,8 @@ pub enum WeChatPayError {
   Unknown(String),
   /// sdk 认为是服务器自身错误，但也有可能是 sdk 的实现错误
   InternalServerError(String),
+  /// 签名验证失败
+  VerifySignatureFail(String),
 }
 
 // implement display trait for WeChatPayError
@@ -75,6 +77,7 @@ impl std::fmt::Display for WeChatPayError {
       WeChatPayError::Accepted => write!(f, "Accepted"),
       WeChatPayError::Unknown(err) => write!(f, "Unknown: {}", err),
       WeChatPayError::InternalServerError(err) => write!(f, "InternalServerError: {}", err),
+      WeChatPayError::VerifySignatureFail(err) => write!(f, "VerifySignatureError: {}", err),
     }
   }
 }
