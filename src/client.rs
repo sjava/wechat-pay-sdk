@@ -1,7 +1,10 @@
 // use redis::aio::MultiplexedConnection;
 use crate::WeChatPayError;
 use aes_gcm::aead::{consts::U32, generic_array::GenericArray};
-use rsa::{pkcs8::DecodePrivateKey, RsaPrivateKey};
+use rsa::{
+  pkcs8::{DecodePrivateKey, DecodePublicKey},
+  RsaPrivateKey, RsaPublicKey,
+};
 use std::fs::read_to_string;
 
 #[derive(Debug)]
@@ -10,6 +13,31 @@ pub struct PlatformPubKey {
   pub expire_time: String,
   pub effective_time: String,
   pub key: String,
+}
+#[derive(Debug)]
+pub struct PlatformPubkeyInner {
+  pub serial_no: String,
+  pub expire_time: u64,
+  pub effective_time: u64,
+  pub key: RsaPublicKey,
+}
+impl TryFrom<PlatformPubKey> for PlatformPubkeyInner {
+  type Error = WeChatPayError;
+  fn try_from(value: PlatformPubKey) -> Result<Self, Self::Error> {
+    Ok(Self {
+      serial_no: value.serial_no,
+      expire_time: value
+        .expire_time
+        .parse::<u64>()
+        .map_err(|_| WeChatPayError::Unknown("expire_time parse error".to_string()))?,
+      effective_time: value
+        .effective_time
+        .parse::<u64>()
+        .map_err(|_| WeChatPayError::Unknown("effective_time parse error".to_string()))?,
+      key: RsaPublicKey::from_public_key_pem(&value.key)
+        .map_err(|_| WeChatPayError::Unknown("public key parse error".to_string()))?,
+    })
+  }
 }
 #[derive(Debug)]
 pub struct Client {
@@ -53,5 +81,8 @@ impl Client {
       .as_ref()?
       .iter()
       .find(|x| x.serial_no == serial_no)
+  }
+  pub fn update_platform_pub_keys(&mut self, platform_pub_keys: Option<Vec<PlatformPubKey>>) {
+    self.platform_pub_keys = platform_pub_keys;
   }
 }
