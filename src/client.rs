@@ -10,30 +10,24 @@ use std::fs::read_to_string;
 #[derive(Debug)]
 pub struct PlatformPubKey {
   pub serial_no: String,
-  pub expire_time: String,
-  pub effective_time: String,
+  pub expire_time: u64,
+  pub effective_time: u64,
   pub key: String,
 }
 #[derive(Debug)]
-pub struct PlatformPubkeyInner {
+pub struct PlatformPubKeyInner {
   pub serial_no: String,
   pub expire_time: u64,
   pub effective_time: u64,
   pub key: RsaPublicKey,
 }
-impl TryFrom<PlatformPubKey> for PlatformPubkeyInner {
+impl TryFrom<PlatformPubKey> for PlatformPubKeyInner {
   type Error = WeChatPayError;
   fn try_from(value: PlatformPubKey) -> Result<Self, Self::Error> {
     Ok(Self {
       serial_no: value.serial_no,
-      expire_time: value
-        .expire_time
-        .parse::<u64>()
-        .map_err(|_| WeChatPayError::Unknown("expire_time parse error".to_string()))?,
-      effective_time: value
-        .effective_time
-        .parse::<u64>()
-        .map_err(|_| WeChatPayError::Unknown("effective_time parse error".to_string()))?,
+      expire_time: value.expire_time,
+      effective_time: value.effective_time,
       key: RsaPublicKey::from_public_key_pem(&value.key)
         .map_err(|_| WeChatPayError::Unknown("public key parse error".to_string()))?,
     })
@@ -45,7 +39,7 @@ pub struct Client {
   pub(crate) private_key: RsaPrivateKey,
   pub(crate) merchant_serial_number: String,
   pub(crate) api_key: GenericArray<u8, U32>,
-  pub(crate) platform_pub_keys: Option<Vec<PlatformPubKey>>,
+  pub(crate) platform_pub_keys: Option<Vec<PlatformPubKeyInner>>,
 }
 
 impl Client {
@@ -65,24 +59,36 @@ impl Client {
     platform_pub_keys: Option<Vec<PlatformPubKey>>,
     // redis: MultiplexedConnection,
   ) -> Result<Self, WeChatPayError> {
+    let platform_pub_keys = platform_pub_keys
+      .map(|x| {
+        x.into_iter()
+          .filter_map(|key| PlatformPubKeyInner::try_from(key).ok())
+          .collect::<Vec<_>>()
+      })
+      .filter(|x| !x.is_empty());
     Ok(Self {
       merchant_id: merchant_id.to_string(),
       private_key: RsaPrivateKey::from_pkcs8_pem(&read_to_string(private_key_path)?)?,
       merchant_serial_number: merchant_serial_number.to_string(),
       api_key: GenericArray::from_slice(api_key.as_bytes()).to_owned(),
-      // redis,
-      // client: reqwest::Client::new(),
       platform_pub_keys,
     })
   }
-  pub fn get_pub_key(&self, serial_no: &str) -> Option<&PlatformPubKey> {
+  pub fn get_pub_key(&self, serial_no: &str) -> Option<&PlatformPubKeyInner> {
     self
       .platform_pub_keys
       .as_ref()?
       .iter()
       .find(|x| x.serial_no == serial_no)
   }
-  pub fn update_platform_pub_keys(&mut self, platform_pub_keys: Option<Vec<PlatformPubKey>>) {
+  pub fn update_platform_pub_keys(
+    &mut self,
+    platform_pub_keys: Option<Vec<PlatformPubKey>>,
+  ) -> Result<(), WeChatPayError> {
+    let platform_pub_keys = platform_pub_keys
+      .map(|x| x.into_iter().map(PlatformPubKeyInner::try_from).collect())
+      .transpose()?;
     self.platform_pub_keys = platform_pub_keys;
+    Ok(())
   }
 }

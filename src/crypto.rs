@@ -9,12 +9,8 @@ use rand::{distributions::Alphanumeric, thread_rng, Rng};
 use reqwest::{header, Method, Response, StatusCode, Url};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use rsa::{
-  pkcs8::DecodePublicKey,
-  sha2::{Digest, Sha256},
-  Pkcs1v15Sign, RsaPrivateKey, RsaPublicKey,
-};
-
+use rsa::sha2::{Digest, Sha256};
+use rsa::{Pkcs1v15Sign, RsaPrivateKey};
 impl Client {
   pub fn sha256_with_rsa(
     &self,
@@ -162,7 +158,7 @@ impl Client {
 
     let client = reqwest::Client::new();
     let res = client.execute(req).await?;
-    let (status, text)= if verify {
+    let (status, text) = if verify {
       self.verify_signatrue(res).await?
     } else {
       (res.status(), res.text().await?)
@@ -197,9 +193,10 @@ impl Client {
           "No public key found".to_string(),
         ))?;
 
-    let pub_key = RsaPublicKey::from_public_key_pem(&pub_key.key).map_err(|e| {
-      WeChatPayError::VerifySignatureFail(format!("public key parser error: {}", e))
-    })?;
+    // let pub_key = RsaPublicKey::from_public_key_pem(&pub_key.key).map_err(|e| {
+    //   WeChatPayError::VerifySignatureFail(format!("public key parser error: {}", e))
+    // })?;
+    let pub_key = &pub_key.key;
     let hashed = Sha256::new().chain_update(message).finalize();
     let signatrue = general_purpose::STANDARD
       .decode(signature.as_str())
