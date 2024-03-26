@@ -189,7 +189,7 @@ impl Client {
     );
     let pub_key =
       self
-        .get_pub_key(serial_no.as_ref())
+        .get_public_key(serial_no.as_ref())
         .ok_or(WeChatPayError::VerifySignatureFail(
           "No public key found".to_string(),
         ))?;

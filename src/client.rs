@@ -1,6 +1,7 @@
 // use redis::aio::MultiplexedConnection;
 use crate::WeChatPayError;
 use aes_gcm::aead::{consts::U32, generic_array::GenericArray};
+use chrono::Utc;
 use rsa::{
   pkcs8::{DecodePrivateKey, DecodePublicKey},
   RsaPrivateKey, RsaPublicKey,
@@ -40,7 +41,7 @@ pub struct Client {
   pub(crate) private_key: RsaPrivateKey,
   pub(crate) merchant_serial_number: String,
   pub(crate) api_key: GenericArray<u8, U32>,
-  pub(crate) platform_pub_keys: Vec<PlatformPubKeyInner>,
+  pub(crate) public_keys: Vec<PlatformPubKeyInner>,
 }
 
 impl Client {
@@ -65,24 +66,32 @@ impl Client {
       private_key: RsaPrivateKey::from_pkcs8_pem(&read_to_string(private_key_path)?)?,
       merchant_serial_number: merchant_serial_number.to_string(),
       api_key: GenericArray::from_slice(api_key.as_bytes()).to_owned(),
-      platform_pub_keys: Vec::new(),
+      public_keys: Vec::new(),
     };
-    client.update_platform_pub_keys(platform_pub_keys);
+    client.update_public_keys(platform_pub_keys);
     Ok(client)
   }
-  pub fn get_pub_key(&self, serial_no: &str) -> Option<&PlatformPubKeyInner> {
-    self
-      .platform_pub_keys
-      .iter()
-      .find(|x| x.serial_no == serial_no)
+  pub fn get_public_key(&self, serial_no: &str) -> Option<&PlatformPubKeyInner> {
+    self.public_keys.iter().find(|x| x.serial_no == serial_no)
   }
-  pub fn update_platform_pub_keys(&mut self, platform_pub_keys: Vec<PlatformPubKey>) {
+  pub fn update_public_keys(&mut self, platform_pub_keys: Vec<PlatformPubKey>) {
     let platform_pub_keys = platform_pub_keys
       .into_iter()
       .filter_map(|key| PlatformPubKeyInner::try_from(key).ok())
       .collect::<Vec<_>>();
     if !platform_pub_keys.is_empty() {
-      self.platform_pub_keys = platform_pub_keys;
+      self.public_keys = platform_pub_keys;
     }
+  }
+  // select the latest public key
+  pub fn get_latest_public_key(&self) -> Option<&PlatformPubKeyInner> {
+    self
+      .public_keys
+      .iter()
+      .filter(|x| {
+        let now = Utc::now().timestamp().try_into().unwrap();
+        x.effective_time < now && x.expire_time > now
+      })
+      .max_by_key(|x| x.effective_time)
   }
 }
