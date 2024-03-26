@@ -33,13 +33,14 @@ impl TryFrom<PlatformPubKey> for PlatformPubKeyInner {
     })
   }
 }
+
 #[derive(Debug)]
 pub struct Client {
   pub merchant_id: String,
   pub(crate) private_key: RsaPrivateKey,
   pub(crate) merchant_serial_number: String,
   pub(crate) api_key: GenericArray<u8, U32>,
-  pub(crate) platform_pub_keys: Option<Vec<PlatformPubKeyInner>>,
+  pub(crate) platform_pub_keys: Vec<PlatformPubKeyInner>,
 }
 
 impl Client {
@@ -56,39 +57,32 @@ impl Client {
     private_key_path: &str,
     merchant_serial_number: &str,
     api_key: &str,
-    platform_pub_keys: Option<Vec<PlatformPubKey>>,
+    platform_pub_keys: Vec<PlatformPubKey>,
     // redis: MultiplexedConnection,
   ) -> Result<Self, WeChatPayError> {
-    let platform_pub_keys = platform_pub_keys
-      .map(|x| {
-        x.into_iter()
-          .filter_map(|key| PlatformPubKeyInner::try_from(key).ok())
-          .collect::<Vec<_>>()
-      })
-      .filter(|x| !x.is_empty());
-    Ok(Self {
+    let mut client = Self {
       merchant_id: merchant_id.to_string(),
       private_key: RsaPrivateKey::from_pkcs8_pem(&read_to_string(private_key_path)?)?,
       merchant_serial_number: merchant_serial_number.to_string(),
       api_key: GenericArray::from_slice(api_key.as_bytes()).to_owned(),
-      platform_pub_keys,
-    })
+      platform_pub_keys: Vec::new(),
+    };
+    client.update_platform_pub_keys(platform_pub_keys);
+    Ok(client)
   }
   pub fn get_pub_key(&self, serial_no: &str) -> Option<&PlatformPubKeyInner> {
     self
       .platform_pub_keys
-      .as_ref()?
       .iter()
       .find(|x| x.serial_no == serial_no)
   }
-  pub fn update_platform_pub_keys(
-    &mut self,
-    platform_pub_keys: Option<Vec<PlatformPubKey>>,
-  ) -> Result<(), WeChatPayError> {
+  pub fn update_platform_pub_keys(&mut self, platform_pub_keys: Vec<PlatformPubKey>) {
     let platform_pub_keys = platform_pub_keys
-      .map(|x| x.into_iter().map(PlatformPubKeyInner::try_from).collect())
-      .transpose()?;
-    self.platform_pub_keys = platform_pub_keys;
-    Ok(())
+      .into_iter()
+      .filter_map(|key| PlatformPubKeyInner::try_from(key).ok())
+      .collect::<Vec<_>>();
+    if !platform_pub_keys.is_empty() {
+      self.platform_pub_keys = platform_pub_keys;
+    }
   }
 }

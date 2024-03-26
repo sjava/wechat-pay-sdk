@@ -18,7 +18,8 @@ impl Client {
     private_key: Option<RsaPrivateKey>,
   ) -> Result<String, WeChatPayError> {
     let private_key = private_key.unwrap_or(self.private_key.clone());
-    let mut hasher = Sha256::new();
+    // let mut hasher = Sha256::new();
+    let mut hasher: Sha256 = Digest::new();
     hasher.update(content);
     let hex = hasher.finalize();
     let signature = private_key.sign(Pkcs1v15Sign::new::<Sha256>(), &hex)?;
@@ -197,13 +198,15 @@ impl Client {
     //   WeChatPayError::VerifySignatureFail(format!("public key parser error: {}", e))
     // })?;
     let pub_key = &pub_key.key;
-    let hashed = Sha256::new().chain_update(message).finalize();
+    let mut hasher: Sha256 = Digest::new();
+    hasher.update(message);
+    let hex = hasher.finalize();
     let signatrue = general_purpose::STANDARD
       .decode(signature.as_str())
       .map_err(|e| WeChatPayError::VerifySignatureFail(format!("signature decode error: {}", e)))?;
     let scheme = Pkcs1v15Sign::new::<Sha256>();
     pub_key
-      .verify(scheme, &hashed, signatrue.as_slice())
+      .verify(scheme, &hex, signatrue.as_slice())
       .map(|_| (status, body))
       .map_err(|e| WeChatPayError::VerifySignatureFail(e.to_string()))
   }
