@@ -119,7 +119,7 @@ impl Client {
     Request: serde::Serialize,
     Response: serde::de::DeserializeOwned + Send + 'static,
   {
-    let verify = url == "/v3/certificates";
+    let verify = url != "/v3/certificates";
     let api = format!("https://api.mch.weixin.qq.com{}", url);
     let (url, path) = if let Some(query) = query {
       let u = Url::parse_with_params(&api, query)?;
