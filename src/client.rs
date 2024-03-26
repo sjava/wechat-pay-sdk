@@ -94,4 +94,8 @@ impl Client {
       })
       .max_by_key(|x| x.effective_time)
   }
+  // check public keys is empty
+  pub fn is_public_keys_empty(&self) -> bool {
+    self.public_keys.is_empty()
+  }
 }
