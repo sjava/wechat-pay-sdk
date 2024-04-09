@@ -9,11 +9,11 @@ use crate::{Client, WeChatPayError};
 use reqwest::multipart::{Form, Part};
 use reqwest::{header, Method};
 use rsa::sha2::{Digest, Sha256};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::json;
 
 /// # [上传图片响应](self) 响应
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct UploadImageResponse {
   pub media_id: String,
 }

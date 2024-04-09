@@ -9,6 +9,6 @@
 //! - 其他能力
 pub mod basic;
 pub(crate) mod cert;
-pub(crate) mod media;
+pub mod media;
 pub mod common;
 pub mod fund;
