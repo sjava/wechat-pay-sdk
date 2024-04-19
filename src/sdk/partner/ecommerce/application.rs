@@ -101,12 +101,15 @@ pub struct FinanceInstitutionInfo {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct BusinessLicenseInfo {
+  #[serde(skip_serializing_if = "Option::is_none")]
   cert_type: Option<CertType>,
   business_license_copy: String,
   business_license_number: String,
   merchant_name: String,
   legal_person: String,
+  #[serde(skip_serializing_if = "Option::is_none")]
   company_address: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   business_time: Option<String>,
 }
 
@@ -151,6 +154,7 @@ pub struct IdCardInfo {
   id_card_national: String,
   id_card_name: String,
   id_card_number: String,
+  #[serde(skip_serializing_if = "Option::is_none")]
   id_card_address: Option<String>,
   id_card_valid_time_begin: String,
   id_card_valid_time: String,
@@ -161,7 +165,9 @@ pub struct IdDocInfo {
   id_doc_name: String,
   id_doc_number: String,
   id_doc_copy: String,
+  #[serde(skip_serializing_if = "Option::is_none")]
   id_doc_copy_back: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   id_doc_address: Option<String>,
   doc_period_begin: String,
   doc_period_end: String,
@@ -196,13 +202,21 @@ pub enum UboIdDocType {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UboInfo {
+  #[serde(skip_serializing_if = "Option::is_none")]
   ubo_id_doc_type: Option<UboIdDocType>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   ubo_id_doc_copy: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   ubo_id_doc_copy_back: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   ubo_id_doc_name: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   ubo_id_doc_number: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   ubo_id_doc_address: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   ubo_id_doc_period_begin: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   ubo_id_doc_period_end: Option<String>,
 }
 
@@ -212,7 +226,9 @@ pub struct AccountInfo {
   account_bank: String,
   account_name: String,
   bank_address_code: String,
+  #[serde(skip_serializing_if = "Option::is_none")]
   bank_branch_id: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   bank_name: Option<String>,
   account_number: String,
 }
@@ -221,22 +237,33 @@ pub struct AccountInfo {
 pub struct ContactInfo {
   contact_type: String,
   contact_name: String,
+  #[serde(skip_serializing_if = "Option::is_none")]
   contact_id_doc_type: Option<IdDocType>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   contact_id_card_number: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   contact_id_doc_copy: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   contact_id_doc_copy_back: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   contact_id_doc_period_begin: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   contact_id_doc_period_end: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   business_authorization_letter: Option<String>,
   mobile_phone: String,
+  #[serde(skip_serializing_if = "Option::is_none")]
   contact_email: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SalesSceneInfo {
   store_name: String,
+  #[serde(skip_serializing_if = "Option::is_none")]
   store_url: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   store_qr_code: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   mini_program_sub_appid: Option<String>,
 }
 
@@ -246,55 +273,54 @@ pub struct SettlementInfo {
   qualification_type: String,
 }
 
-#[serde_as]
-#[derive(Debug, Deserialize, Serialize)]
-pub struct MerchantSubmitInfo {
-  pub organization_type: OrganizationType,
-
-  #[serde(default)]
-  #[serde_as(deserialize_as = "DefaultOnNull")]
-  pub finance_institution: bool,
-
-  pub business_license_info: Option<BusinessLicenseInfo>,
-  pub finance_institution_info: Option<FinanceInstitutionInfo>,
-  pub id_holder_type: Option<IdHolderType>,
-  pub id_doc_type: IdDocType,
-  pub authorize_letter_copy: Option<String>,
-  pub id_card_info: Option<IdCardInfo>,
-  pub id_doc_info: Option<IdDocInfo>,
-  pub owner: Option<bool>,
-  pub ubo_info_list: Option<Vec<UboInfo>>,
-  pub account_info: AccountInfo,
-  pub contact_info: ContactInfo,
-  pub sales_scene_info: SalesSceneInfo,
-  pub settlement_info: Option<SettlementInfo>,
-  pub merchant_shortname: String,
-  pub qualifications: Option<String>,
-  pub business_addition_pics: Option<String>,
-  pub business_addition_desc: Option<String>,
-}
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct MerchantApplyInfo {
   pub out_request_no: String,
   pub organization_type: OrganizationType,
   pub finance_institution: bool,
+
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub business_license_info: Option<BusinessLicenseInfo>,
+
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub finance_institution_info: Option<FinanceInstitutionInfo>,
+
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub id_holder_type: Option<IdHolderType>,
+
   pub id_doc_type: IdDocType,
+
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub authorize_letter_copy: Option<String>,
+
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub id_card_info: Option<IdCardInfo>,
+
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub id_doc_info: Option<IdDocInfo>,
+
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub owner: Option<bool>,
+
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub ubo_info_list: Option<Vec<UboInfo>>,
+
   pub account_info: AccountInfo,
   pub contact_info: ContactInfo,
   pub sales_scene_info: SalesSceneInfo,
+
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub settlement_info: Option<SettlementInfo>,
+
   pub merchant_shortname: String,
+
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub qualifications: Option<String>,
+
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub business_addition_pics: Option<String>,
+
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub business_addition_desc: Option<String>,
 }
 
@@ -314,5 +340,76 @@ impl Client {
         .await?
         .unwrap(),
     )
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use serde_json::json;
+
+  use super::*;
+  use crate::client::Client;
+  use std::env;
+
+  #[test]
+  fn est_merchant_apply() {
+    let req = MerchantApplyInfo {
+      out_request_no: "APPLYMENT_00000000001".to_string(),
+      organization_type: OrganizationType::SmallMicroMerchant,
+      finance_institution: false,
+      business_license_info: None,
+      finance_institution_info: None,
+      id_holder_type: None,
+      id_doc_type: IdDocType::MainlandIdcard,
+      authorize_letter_copy: None,
+      id_card_info: Some(IdCardInfo {
+        id_card_copy: "szf0".to_string(),
+        id_card_national: "sfz1".to_string(),
+        id_card_name: "name".to_string(),
+        id_card_number: "number".to_string(),
+        id_card_address: None,
+        id_card_valid_time_begin: "begin_time".to_string(),
+        id_card_valid_time: "valid_time".to_string(),
+      }),
+      id_doc_info: None,
+      owner: None,
+      ubo_info_list: None,
+      account_info: AccountInfo {
+        account_type: "75".to_string(),
+        account_bank: "工商银行".to_string(),
+        account_name: "name".to_string(),
+        bank_address_code: "110000".to_string(),
+        bank_branch_id: None,
+        bank_name: None,
+        account_number: "account_number".to_string(),
+      },
+      contact_info: ContactInfo {
+        contact_type: "65".to_string(),
+        contact_name: "name".to_string(),
+        contact_id_doc_type: None,
+        contact_id_card_number: None,
+        contact_id_doc_copy: None,
+        contact_id_doc_copy_back: None,
+        contact_id_doc_period_begin: None,
+        contact_id_doc_period_end: None,
+        business_authorization_letter: None,
+        mobile_phone: "phone".to_string(),
+        contact_email: None,
+      },
+      sales_scene_info: SalesSceneInfo {
+        store_name: "store_name".to_string(),
+        store_url: None,
+        store_qr_code: Some("qr_code".to_string()),
+        mini_program_sub_appid: None,
+      },
+      settlement_info: None,
+      merchant_shortname: "shortname".to_string(),
+      qualifications: None,
+      business_addition_pics: None,
+      business_addition_desc: None,
+    };
+    println!("{:#?}", json!(req));
+    let result = serde_json::to_string(&req).unwrap();
+    println!("{:#?}", result);
   }
 }
