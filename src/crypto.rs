@@ -9,9 +9,24 @@ use rand::{distributions::Alphanumeric, thread_rng, Rng};
 use reqwest::{header, Method, Response, StatusCode, Url};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use rsa::sha2::{Digest, Sha256};
-use rsa::{Pkcs1v15Sign, RsaPrivateKey};
+use rsa::{sha2::{Digest, Sha256}, Oaep};
+use rsa::{Pkcs1v15Sign, RsaPrivateKey, RsaPublicKey};
+use sha1::Sha1;
+
 impl Client {
+  pub fn rsa_encrypt_oaep(
+    message: &str,
+    public_key: RsaPublicKey,
+  ) -> Result<String, WeChatPayError> {
+    let mut rng = rand::thread_rng();
+    let padding= Oaep::new::<Sha1>();
+
+    let encrypted_data = public_key.encrypt(&mut rng,padding, message.as_bytes())?;
+    let encoded = general_purpose::STANDARD.encode(encrypted_data);
+
+    Ok(encoded)
+  }
+
   pub fn sha256_with_rsa(
     &self,
     content: &[u8],
